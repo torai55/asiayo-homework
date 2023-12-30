@@ -1,3 +1,5 @@
+import { Request, Response, NextFunction } from "express"
+import { validationResult } from "express-validator"
 import { Socket } from 'net'
 import http from 'http'
 
@@ -15,4 +17,11 @@ export function shutDown(server: http.Server, connections: Socket[]) {
 
   connections.forEach((curr) => curr.end())
   setTimeout(() => connections.forEach((curr) => curr.destroy()), 5000)
+}
+
+export function handleValidationResult(req: Request, res: Response, next: NextFunction) {
+  const errors = validationResult(req)
+  if (errors.isEmpty()) return next()
+
+  return res.status(400).json({ msg: 'input error', errors: errors.array() })
 }
